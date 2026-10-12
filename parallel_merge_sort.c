@@ -38,7 +38,7 @@ void merge(int arr[], int temp[], int left, int mid, int right) {
     }
 }
 
-// Sequential Merge Sort
+// Sequential Merge Sort for small subarrays
 void sequentialMergeSort(int arr[], int temp[], int left, int right) {
     if (left >= right) {
         return;
@@ -54,7 +54,6 @@ void sequentialMergeSort(int arr[], int temp[], int left, int right) {
 
 // Parallel Merge Sort using OpenMP tasks
 void parallelMergeSort(int arr[], int temp[], int left, int right) {
-
     if (left >= right) {
         return;
     }
@@ -67,10 +66,10 @@ void parallelMergeSort(int arr[], int temp[], int left, int right) {
 
     int mid = left + (right - left) / 2;
 
-    #pragma omp task
+    #pragma omp task shared(arr, temp)
     parallelMergeSort(arr, temp, left, mid);
 
-    #pragma omp task
+    #pragma omp task shared(arr, temp)
     parallelMergeSort(arr, temp, mid + 1, right);
 
     #pragma omp taskwait
@@ -89,19 +88,30 @@ int isSorted(int arr[], int n) {
     return 1;
 }
 
-int main() {
-
+int main(int argc, char *argv[]) {
     int n = 1000000;
 
-    int *arr = malloc(n * sizeof(int));
-    int *temp = malloc(n * sizeof(int));
+    // Accept an optional input size
+    if (argc > 1) {
+        char *endptr;
+        long inputSize = strtol(argv[1], &endptr, 10);
+
+        if (*argv[1] == '\0' || *endptr != '\0' ||
+            inputSize <= 0 || inputSize > 2147483647L) {
+            printf("Please provide a valid positive input size.\n");
+            return 1;
+        }
+
+        n = (int)inputSize;
+    }
+
+    int *arr = malloc((size_t)n * sizeof(int));
+    int *temp = malloc((size_t)n * sizeof(int));
 
     if (arr == NULL || temp == NULL) {
         printf("Memory allocation failed.\n");
-
         free(arr);
         free(temp);
-
         return 1;
     }
 
@@ -114,14 +124,17 @@ int main() {
 
     printf("Generated %d random elements.\n", n);
 
+    int actualThreads = 1;
+
     // Start timing
     double start = omp_get_wtime();
 
     // Start OpenMP parallel region
-    #pragma omp parallel
+    #pragma omp parallel shared(arr, temp, actualThreads)
     {
         #pragma omp single
         {
+            actualThreads = omp_get_num_threads();
             parallelMergeSort(arr, temp, 0, n - 1);
         }
     }
@@ -130,7 +143,7 @@ int main() {
     double end = omp_get_wtime();
 
     printf("Parallel execution time: %.6f seconds\n", end - start);
-    printf("Threads used: %d\n", omp_get_max_threads());
+    printf("Threads used: %d\n", actualThreads);
 
     // Verify correctness
     if (isSorted(arr, n)) {
