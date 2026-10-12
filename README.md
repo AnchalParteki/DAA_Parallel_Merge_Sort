@@ -1,144 +1,211 @@
+
 # DAA_Parallel_Merge_Sort
 
-Sequential and Parallel Merge Sort Performance Comparison using OpenMP
+## Sequential and Parallel Merge Sort Performance Comparison Using OpenMP
 
-## Problem Statement
+## 1. Problem Statement
 
 Develop sequential and parallel implementations of Merge Sort and compare their performance for increasingly large datasets.
 
-## Objective
+## 2. Objectives
 
-The objective of this project is to implement Merge Sort using both sequential and parallel approaches and compare their performance based on execution time, speedup, parallel efficiency, input size, and number of threads.
+- Implement sequential Merge Sort in C.
+- Implement parallel Merge Sort using OpenMP tasks.
+- Compare execution time for different input sizes.
+- Evaluate performance using different thread counts.
+- Calculate speedup and parallel efficiency.
+- Verify the correctness of both implementations.
 
-## Technologies Used
+## 3. Technologies Used
 
 - C Programming
 - OpenMP
 - GCC Compiler
+- MSYS2 UCRT64
 - Visual Studio Code
+- Windows 11
 
-## Project Components
+## 4. Project Files
 
-### 1. Sequential Merge Sort
+| File | Description |
+|---|---|
+| `sequential_merge_sort.c` | Sequential Merge Sort implementation |
+| `parallel_merge_sort.c` | Parallel Merge Sort using OpenMP tasks |
+| `openmp_test.c` | Tests the OpenMP environment |
+| `input_size_scaling.csv` | Execution-time data for different input sizes |
+| `thread_scaling.csv` | Execution time, speedup, and efficiency for different thread counts |
 
-The sequential implementation uses the standard Divide and Conquer approach of Merge Sort.
-
-File: `sequential_merge_sort.c`
-
-### 2. Parallel Merge Sort
-
-The parallel implementation uses OpenMP tasks to process the two halves of the array concurrently.
-
-File: `parallel_merge_sort.c`
-
-### 3. OpenMP Test
-
-An OpenMP test program is included to verify the OpenMP environment and display the number of available threads.
-
-File: `openmp_test.c`
-
-## Algorithm
+## 5. Algorithm
 
 Merge Sort follows the Divide and Conquer approach:
 
 1. Divide the array into two halves.
-2. Recursively sort the two halves.
-3. Merge the sorted halves.
-4. Continue until the complete array is sorted.
+2. Recursively sort the left half.
+3. Recursively sort the right half.
+4. Merge the sorted halves.
+5. Repeat until the complete array is sorted.
 
-In the parallel implementation, the two halves can be processed concurrently using OpenMP tasks.
+The parallel implementation uses OpenMP tasks to process the two halves concurrently. The program uses sequential Merge Sort for subarrays of size 10,000 or smaller to reduce task-creation overhead.
 
-## Compilation
+## 6. Compilation
 
-### Sequential Merge Sort
+Compile the sequential implementation:
 
-gcc sequential_merge_sort.c -o sequential_merge_sort.exe -fopenmp
+```bash
+gcc -fopenmp sequential_merge_sort.c -o sequential_merge_sort.exe
+```
 
-### Parallel Merge Sort
+Compile the parallel implementation:
 
-gcc parallel_merge_sort.c -o parallel_merge_sort.exe -fopenmp
+```bash
+gcc -fopenmp parallel_merge_sort.c -o parallel_merge_sort.exe
+```
 
-### OpenMP Test
+Compile the OpenMP test:
 
-gcc openmp_test.c -o openmp_test.exe -fopenmp
+```bash
+gcc -fopenmp openmp_test.c -o openmp_test.exe
+```
 
-## Execution
+## 7. Execution
 
-### Run Sequential Merge Sort
+Run sequential Merge Sort with the default input size of 1,000,000:
 
+```bash
 sequential_merge_sort.exe
+```
 
-### Run Parallel Merge Sort
+Run parallel Merge Sort with the default input size:
 
+```bash
 parallel_merge_sort.exe
+```
 
-### Run OpenMP Test
+Run with a custom input size:
 
+```bash
+sequential_merge_sort.exe 100000
+parallel_merge_sort.exe 100000
+```
+
+Set the thread count in Windows Command Prompt:
+
+```cmd
+set OMP_NUM_THREADS=8
+parallel_merge_sort.exe
+```
+
+Run the OpenMP test:
+
+```bash
 openmp_test.exe
+```
 
-## Correctness Verification
+## 8. Experimental Setup
 
-Both sequential and parallel implementations verify whether the final array is sorted correctly.
+- Operating System: Windows 11
+- Compiler: GCC 16.2.0 (MSYS2 UCRT64)
+- Parallel programming model: OpenMP
+- Random seed: 42
+- Random values: `rand() % 100000`
+- Task threshold: 10,000 elements
+- Timing function: `omp_get_wtime()`
+- Correctness verification: `isSorted()`
+- Thread counts tested: 1, 2, 4, 8, and 16
+- Input sizes tested: 100,000, 500,000, and 1,000,000 elements
 
-The output confirms the correctness of the implementation after sorting.
-
-## Performance Evaluation
-
-The performance of sequential and parallel Merge Sort is evaluated using:
-
-- Execution time
-- Increasing input sizes
-- Different thread counts
-- Speedup
-- Parallel efficiency
-
-The experimental data is stored in the following CSV files:
-
-- `input_size_scaling.csv`
-- `thread_scaling.csv`
-
-## Performance Metrics
+## 9. Performance Metrics
 
 ### Speedup
 
-Speedup is calculated using:
+Speedup measures how much faster the parallel implementation is than the sequential baseline.
 
 Speedup = Sequential Execution Time / Parallel Execution Time
 
 ### Parallel Efficiency
 
-Parallel efficiency is calculated using:
+Parallel efficiency measures how effectively the available threads are utilized.
 
 Parallel Efficiency = (Speedup / Number of Threads) × 100
 
-## Input Size Scaling
+Sequential baseline for the thread-scaling experiment: 0.278 seconds.
 
-The input-size experiment compares the execution time of Merge Sort for increasingly large datasets.
+## 10. Thread-Scaling Results
 
-The results are stored in:
+The following results were recorded for 1,000,000 elements.
 
-`input_size_scaling.csv`
+| Threads | Parallel Time (s) | Speedup | Efficiency |
+|---:|---:|---:|---:|
+| 1 | 0.283 | 0.98× | 98.23% |
+| 2 | 0.156 | 1.78× | 89.10% |
+| 4 | 0.132 | 2.11× | 52.65% |
+| 8 | 0.081 | 3.43× | 42.90% |
+| 16 | 0.068 | 4.09× | 25.55% |
 
-## Thread Scaling
+The best recorded execution time in this experiment was 0.068 seconds using 16 threads, corresponding to a speedup of approximately 4.09×.
 
-The thread-scaling experiment evaluates the performance of the parallel implementation using different numbers of threads.
+As the thread count increases, execution time decreases in the recorded experiment. However, parallel efficiency decreases because of task-management overhead, synchronization, memory bandwidth limitations, and the sequential portions of the algorithm.
 
-The results are stored in:
+## 11. Input-Size Scaling Results
 
-`thread_scaling.csv`
+The following results were recorded while using 8 threads.
 
-## Performance Analysis
+| Input Size | Execution Time (s) |
+|---:|---:|
+| 100,000 | 0.010 |
+| 500,000 | 0.044 |
+| 1,000,000 | 0.105 |
 
-The performance results will be analyzed by comparing sequential and parallel execution times for different input sizes and thread configurations.
+Execution time increases as the input size increases because more elements must be divided, sorted, and merged.
 
-The analysis will also consider the effect of increasing the number of threads, parallel overhead, and possible performance bottlenecks.
+The 1,000,000-element timing in this experiment differs from the 8-thread result in the thread-scaling experiment because these were separate experimental runs.
 
-## Team Members
+## 12. Task Threshold Experiment
 
-- Nandani Waghmare 
-- Ruchita Telang 
+Creating too many OpenMP tasks can increase scheduling and synchronization overhead.
+
+In the reported experiment, unrestricted task creation took approximately 2.843 seconds for 1,000,000 elements with 16 threads, compared with the sequential baseline of 0.278 seconds.
+
+Using `TASK_THRESHOLD 10000` reduced the measured time to approximately 0.102 seconds in the corresponding test. The best final recorded thread-scaling result was 0.068 seconds.
+
+Only one threshold value was tested. Evaluating additional threshold values is a possible future improvement.
+
+## 13. Correctness Verification
+
+Both implementations use the `isSorted()` function to verify that each element is no greater than the next element.
+
+The recorded runs confirmed that the arrays were sorted correctly.
+
+## 14. Complexity Analysis
+
+For Merge Sort:
+
+- Time complexity: O(n log n)
+- Auxiliary space complexity: O(n)
+
+The parallel implementation can reduce execution time by distributing recursive sorting tasks across multiple threads, although the actual benefit depends on task overhead and available hardware resources.
+
+## 15. Limitations
+
+- Performance depends on the computer's hardware and system load.
+- OpenMP task creation and synchronization introduce overhead.
+- Memory bandwidth and cache behavior can limit scalability.
+- The algorithm contains sequential work that limits the maximum achievable speedup.
+- Only one task-threshold value was evaluated.
+
+## 16. Future Scope
+
+- Evaluate additional task-threshold values.
+- Repeat experiments to study timing variation.
+- Compare performance on different hardware configurations.
+- Explore additional parallelization strategies.
+
+## 17. Team Members
+
+- Nandani Waghmare
+- Ruchita Telang
 - Anchal Parteki
 
-## Project Type
+## 18. Project Type
 
 DAA Mini Project
