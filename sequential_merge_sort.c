@@ -61,19 +61,30 @@ int isSorted(int arr[], int n) {
     return 1;
 }
 
-int main() {
-
+int main(int argc, char *argv[]) {
     int n = 1000000;
 
-    int *arr = malloc(n * sizeof(int));
-    int *temp = malloc(n * sizeof(int));
+    // Accept an optional input size
+    if (argc > 1) {
+        char *endptr;
+        long inputSize = strtol(argv[1], &endptr, 10);
+
+        if (*argv[1] == '\0' || *endptr != '\0' ||
+            inputSize <= 0 || inputSize > 2147483647L) {
+            printf("Please provide a valid positive input size.\n");
+            return 1;
+        }
+
+        n = (int)inputSize;
+    }
+
+    int *arr = malloc((size_t)n * sizeof(int));
+    int *temp = malloc((size_t)n * sizeof(int));
 
     if (arr == NULL || temp == NULL) {
         printf("Memory allocation failed.\n");
-
         free(arr);
         free(temp);
-
         return 1;
     }
 
@@ -89,14 +100,13 @@ int main() {
     // Start timing
     double start = omp_get_wtime();
 
-    // Sequential Merge Sort
+    // Perform sequential Merge Sort
     mergeSort(arr, temp, 0, n - 1);
 
     // Stop timing
     double end = omp_get_wtime();
 
-    printf("Sequential execution time: %.6f seconds\n",
-           end - start);
+    printf("Sequential execution time: %.6f seconds\n", end - start);
 
     // Verify correctness
     if (isSorted(arr, n)) {
